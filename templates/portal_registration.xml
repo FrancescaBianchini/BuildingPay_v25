@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         FORM DI REGISTRAZIONE BUILDINGPAY
+         Estende il form standard con campi aggiuntivi
+         e gestisce il codice referrer
+    ================================================= -->
+    <template id="signup_form"
+              name="BuildingPay - Form di Registrazione"
+              inherit_id="auth_signup.signup">
+
+        <!-- Sostituiamo il form standard con quello BuildingPay -->
+        <xpath expr="//form[hasclass('oe_signup_form')]" position="replace">
+            <form class="oe_signup_form buildingpay-signup-form"
+                  action="/web/signup"
+                  method="post">
+                <input type="hidden" name="csrf_token"
+                       t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="redirect" t-att-value="redirect or ''"/>
+
+                <!-- Referrer code nascosto -->
+                <t t-if="referrer_code">
+                    <input type="hidden" name="referrer_code" t-att-value="referrer_code"/>
+                </t>
+
+                <!-- Messaggio referrer (se presente) -->
+                <t t-if="referrer_partner">
+                    <div class="alert alert-info mb-4" role="alert">
+                        <i class="fa fa-user-plus me-2"/>
+                        Sei stato invitato da <strong t-field="referrer_partner.name"/>
+                        ad iscriverti a BuildingPay.
+                    </div>
+                </t>
+
+                <!-- Errori generali -->
+                <t t-if="error and error.get('general')">
+                    <div class="alert alert-danger">
+                        <t t-esc="error.get('general')"/>
+                    </div>
+                </t>
+
+                <!-- ============================================================
+                     DATI PERSONALI
+                ============================================================= -->
+                <h5 class="mb-3">Dati personali</h5>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label" for="name">
+                            Nome e Cognome <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="name"
+                               id="name"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('name') else ''"
+                               t-att-value="form_data.get('name', '') if form_data else ''"
+                               placeholder="Es. Mario Rossi"
+                               required="required"
+                               autofocus="autofocus"/>
+                        <t t-if="error and error.get('name')">
+                            <div class="invalid-feedback"><t t-esc="error.get('name')"/></div>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="fiscalcode">Codice Fiscale</label>
+                        <input type="text"
+                               name="fiscalcode"
+                               id="fiscalcode"
+                               class="form-control"
+                               t-att-value="form_data.get('fiscalcode', '') if form_data else ''"
+                               placeholder="Es. RSSMRA80A01H501Z"
+                               maxlength="16"/>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="vat">Partita IVA</label>
+                        <input type="text"
+                               name="vat"
+                               id="vat"
+                               class="form-control"
+                               t-att-value="form_data.get('vat', '') if form_data else ''"
+                               placeholder="Es. IT01234567890"/>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="phone">Telefono</label>
+                    <input type="tel"
+                           name="phone"
+                           id="phone"
+                           class="form-control"
+                           t-att-value="form_data.get('phone', '') if form_data else ''"
+                           placeholder="Es. +39 06 12345678"/>
+                </div>
+
+                <!-- ============================================================
+                     INDIRIZZO
+                ============================================================= -->
+                <h5 class="mb-3 mt-3">Indirizzo</h5>
+
+                <!-- Via -->
+                <div class="row">
+                    <div class="col-md-9 mb-3">
+                        <label class="form-label" for="street">
+                            Via / Indirizzo <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="street"
+                               id="street"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('street') else ''"
+                               t-att-value="form_data.get('street', '') if form_data else ''"
+                               placeholder="Es. Via Roma 1"
+                               required="required"/>
+                        <t t-if="error and error.get('street')">
+                            <div class="invalid-feedback"><t t-esc="error.get('street')"/></div>
+                        </t>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label" for="street2">Interno / Scala</label>
+                        <input type="text"
+                               name="street2"
+                               id="street2"
+                               class="form-control"
+                               t-att-value="form_data.get('street2', '') if form_data else ''"
+                               placeholder="Es. Int. 3"/>
+                    </div>
+                </div>
+
+                <!-- CAP + Città -->
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label" for="zip">
+                            CAP <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="zip"
+                               id="zip"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('zip') else ''"
+                               t-att-value="form_data.get('zip', '') if form_data else ''"
+                               placeholder="Es. 00100"
+                               maxlength="5"
+                               required="required"/>
+                        <t t-if="error and error.get('zip')">
+                            <div class="invalid-feedback"><t t-esc="error.get('zip')"/></div>
+                        </t>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="city">
+                            Città <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="city"
+                               id="city"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('city') else ''"
+                               t-att-value="form_data.get('city', '') if form_data else ''"
+                               placeholder="Es. Roma"
+                               required="required"/>
+                        <t t-if="error and error.get('city')">
+                            <div class="invalid-feedback"><t t-esc="error.get('city')"/></div>
+                        </t>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label" for="state_code">Provincia</label>
+                        <input type="text"
+                               name="state_code"
+                               id="state_code"
+                               class="form-control"
+                               t-att-value="form_data.get('state_code', '') if form_data else ''"
+                               placeholder="Es. RM"
+                               maxlength="3"/>
+                    </div>
+                </div>
+
+                <!-- Paese – riga intera per massima leggibilità -->
+                <div class="mb-3">
+                    <label class="form-label" for="country_id">Paese / Nazione</label>
+                    <select name="country_id" id="country_id" class="form-select">
+                        <option value="">-- Seleziona paese --</option>
+                        <t t-foreach="request.env['res.country'].sudo().search([], order='name')"
+                           t-as="country">
+                            <option t-att-value="country.id"
+                                    t-att-selected="'selected' if (form_data and str(form_data.get('country_id','')) == str(country.id)) or (not form_data and country.code == 'IT') else None">
+                                <t t-esc="country.name"/>
+                            </option>
+                        </t>
+                    </select>
+                    <div class="form-text text-muted">
+                        Default: Italia. Seleziona un altro paese se necessario.
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     DATI BANCARI
+                ============================================================= -->
+                <h5 class="mb-3 mt-3">Dati bancari</h5>
+                <p class="text-muted small mb-3">
+                    Questi dati saranno utilizzati per generare l'Accordo Retrocessioni
+                    e per i pagamenti delle retrocessioni.
+                </p>
+
+                <!-- IBAN: riga intera -->
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label" for="iban">IBAN</label>
+                        <input type="text"
+                               name="iban"
+                               id="iban"
+                               class="form-control"
+                               t-att-class="'is-invalid' if error and error.get('iban') else ''"
+                               t-att-value="form_data.get('iban', '') if form_data else ''"
+                               placeholder="Es. IT60 X054 2811 1010 0000 0123 456"
+                               maxlength="34"/>
+                        <t t-if="error and error.get('iban')">
+                            <div class="invalid-feedback"><t t-esc="error.get('iban')"/></div>
+                        </t>
+                    </div>
+                </div>
+                <!-- Istituto bancario:
+                     - Se esistono record in res.bank → mostra un <select> con l'elenco
+                       + opzione "Altra banca (digita il nome)" che apre un campo testo.
+                     - Se res.bank è vuoto → mostra direttamente il campo testo.
+                     Il controller usa banca_nome (testo libero) se valorizzato,
+                     altrimenti usa il valore selezionato nel select (banca_select). -->
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label" for="banca_select">
+                            Istituto bancario
+                        </label>
+
+                        <!-- SELECT: visibile solo se ci sono banche a sistema -->
+                        <t t-if="banks">
+                            <select name="banca_select"
+                                    id="banca_select"
+                                    class="form-select mb-2"
+                                    onchange="
+                                        var div = document.getElementById('banca_nome_row');
+                                        div.style.display = (this.value === '__altra__') ? 'block' : 'none';
+                                    ">
+                                <option value="">-- Seleziona istituto bancario --</option>
+                                <t t-foreach="banks" t-as="bank">
+                                    <option t-att-value="bank.name"
+                                            t-att-selected="'selected' if form_data and form_data.get('banca_select') == bank.name else None">
+                                        <t t-esc="bank.name"/>
+                                    </option>
+                                </t>
+                                <option value="__altra__"
+                                        t-att-selected="'selected' if form_data and form_data.get('banca_select') == '__altra__' else None">
+                                    Altra banca (digita il nome)...
+                                </option>
+                            </select>
+                            <small class="text-muted">
+                                Seleziona dall'elenco oppure scegli "Altra banca" per
+                                inserire un nuovo istituto.
+                            </small>
+                        </t>
+
+                        <!-- TESTO: sempre visibile se res.bank vuoto;
+                             visibile solo quando select = "altra" se banche presenti.
+                             t-att-style gestisce la visibilità iniziale in caso di
+                             re-render dopo errore di validazione. -->
+                        <div id="banca_nome_row"
+                             t-att-style="'' if (not banks or (form_data and form_data.get('banca_select') == '__altra__')) else 'display:none'">
+                            <input type="text"
+                                   name="banca_nome"
+                                   id="banca_nome"
+                                   class="form-control mt-2"
+                                   t-att-value="form_data.get('banca_nome', '') if form_data else ''"
+                                   placeholder="Es. Banca Intesa Sanpaolo"
+                                   autocomplete="off"/>
+                            <small class="text-muted">
+                                Digita il nome del nuovo istituto bancario da registrare.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     CREDENZIALI DI ACCESSO
+                ============================================================= -->
+                <h5 class="mb-3 mt-3">Accesso</h5>
+
+                <div class="mb-3">
+                    <label class="form-label" for="login">
+                        Email (username) <span class="text-danger">*</span>
+                    </label>
+                    <input type="email"
+                           name="login"
+                           id="login"
+                           class="form-control"
+                           t-att-class="'is-invalid' if error and error.get('login') else ''"
+                           t-att-value="form_data.get('login', '') if form_data else ''"
+                           placeholder="La tua email"
+                           required="required"/>
+                    <t t-if="error and error.get('login')">
+                        <div class="invalid-feedback"><t t-esc="error.get('login')"/></div>
+                    </t>
+                </div>
+
+                <!-- Password: riga intera -->
+                <div class="mb-3">
+                    <label class="form-label" for="password">
+                        Password <span class="text-danger">*</span>
+                    </label>
+                    <input type="password"
+                           name="password"
+                           id="password"
+                           class="form-control"
+                           t-att-class="'is-invalid' if error and error.get('password') else ''"
+                           required="required"/>
+                    <t t-if="error and error.get('password')">
+                        <div class="invalid-feedback"><t t-esc="error.get('password')"/></div>
+                    </t>
+                </div>
+                <!-- Conferma password: nuova riga separata -->
+                <div class="mb-3">
+                    <label class="form-label" for="confirm_password">
+                        Conferma password <span class="text-danger">*</span>
+                    </label>
+                    <input type="password"
+                           name="confirm_password"
+                           id="confirm_password"
+                           class="form-control"
+                           t-att-class="'is-invalid' if error and error.get('confirm_password') else ''"
+                           required="required"/>
+                    <t t-if="error and error.get('confirm_password')">
+                        <div class="invalid-feedback">
+                            <t t-esc="error.get('confirm_password')"/>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Accettazione Privacy -->
+                <div class="mb-4">
+                    <div class="form-check">
+                        <input type="checkbox"
+                               name="privacy_accepted"
+                               id="privacy_accepted"
+                               class="form-check-input"
+                               t-att-class="'is-invalid' if error and error.get('privacy_accepted') else ''"
+                               value="1"
+                               required="required"/>
+                        <label class="form-check-label" for="privacy_accepted">
+                            Ho letto e accetto la
+                            <a href="/privacy-policy" target="_blank">Privacy Policy</a>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <t t-if="error and error.get('privacy_accepted')">
+                            <div class="invalid-feedback d-block">
+                                <t t-esc="error.get('privacy_accepted')"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fa fa-user-plus me-2"/>
+                        Registrati
+                    </button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        Hai già un account?
+                        <a href="/web/login">Accedi qui</a>
+                    </small>
+                </div>
+            </form>
+        </xpath>
+    </template>
+</odoo>

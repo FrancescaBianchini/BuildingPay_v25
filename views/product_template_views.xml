@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        BuildingPay - Prodotti PagoPa
+        View standalone (no inherit_id) per compatibilità massima.
+        Accessibile dal menu BuildingPay > Prodotti PagoPa.
+    -->
+
+    <!-- ================================================
+         FORM VIEW standalone: product.template
+    ================================================= -->
+    <record id="view_product_template_form_buildingpay" model="ir.ui.view">
+        <field name="name">product.template.form.buildingpay</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <form string="Prodotto PagoPa BuildingPay">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nome prodotto"/></h1>
+                    </div>
+                    <group>
+                        <group string="Vendita">
+                            <field name="sale_ok"/>
+                            <field name="purchase_ok"/>
+                            <field name="is_condominio_pagopa"/>
+                        </group>
+                        <group string="Prezzo">
+                            <field name="list_price" string="Prezzo di vendita"/>
+                            <field name="uom_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================
+         LIST VIEW standalone: product.template
+    ================================================= -->
+    <record id="view_product_template_tree_buildingpay" model="ir.ui.view">
+        <field name="name">product.template.tree.buildingpay</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <tree string="Prodotti PagoPa BuildingPay">
+                <field name="name"/>
+                <field name="list_price" string="Prezzo"/>
+                <field name="is_condominio_pagopa"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ================================================
+         ACTION: Prodotti PagoPa BuildingPay
+    ================================================= -->
+    <record id="action_buildingpay_prodotti_pagopa" model="ir.actions.act_window">
+        <field name="name">Prodotti PagoPa</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_condominio_pagopa', '=', True)]</field>
+        <field name="context">{'default_is_condominio_pagopa': True}</field>
+        <field name="views" eval="[
+            (ref('view_product_template_tree_buildingpay'), 'list'),
+            (ref('view_product_template_form_buildingpay'), 'form'),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea il primo prodotto PagoPa
+            </p>
+        </field>
+    </record>
+</odoo>

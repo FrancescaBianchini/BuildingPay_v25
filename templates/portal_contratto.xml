@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         PAGINA PORTALE: Contratti
+         Mostra due documenti distinti:
+         1. Accordo Retrocessioni Amministratore ED
+         2. Accordo Condomini Aggregati ED
+    ================================================= -->
+    <template id="portal_contratti"
+              name="BuildingPay - Contratti">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Contratti</t>
+            </t>
+
+            <div class="container mt-4">
+
+                <!-- Messaggi di feedback -->
+                <t t-if="success == 'retrocessioni_uploaded'">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fa fa-check-circle me-2"/>
+                        L'Accordo Retrocessioni firmato è stato caricato con successo!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="success == 'condomini_uploaded'">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fa fa-check-circle me-2"/>
+                        L'Accordo Condomini Aggregati firmato è stato caricato con successo!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="error == 'no_template_retrocessioni'">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fa fa-exclamation-triangle me-2"/>
+                        Il template Accordo Retrocessioni non è ancora disponibile.
+                        Contatta l'amministratore di sistema.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="error == 'no_template_condomini'">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fa fa-exclamation-triangle me-2"/>
+                        Il template Accordo Condomini Aggregati non è ancora disponibile.
+                        Contatta l'amministratore di sistema.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="error and error not in ('no_template_retrocessioni', 'no_template_condomini')">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fa fa-exclamation-circle me-2"/>
+                        Si è verificato un errore. Riprova o contatta l'assistenza.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+
+                <!-- ======================================================
+                     CONTRATTO 1: Accordo Retrocessioni Amministratore ED
+                ====================================================== -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-file-text-o me-2"/>
+                            Accordo Retrocessioni Amministratore ED
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-4">
+                            Questo documento regola le condizioni di retrocessione
+                            per gli amministratori aderenti al programma BuildingPay.
+                            Scarica il documento pre-compilato con i tuoi dati,
+                            firmalo e caricalo qui sotto.
+                        </p>
+
+                        <div class="row">
+                            <!-- Download pre-compilato -->
+                            <div class="col-md-6 mb-3">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fa fa-download me-2 text-primary"/>
+                                    Scarica il documento
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    Il documento verrà pre-compilato con:
+                                </p>
+                                <ul class="small text-muted mb-3">
+                                    <li>Nome: <strong t-field="partner.name"/></li>
+                                    <li>Codice Fiscale:
+                                        <strong>
+                                            <t t-esc="partner.fiscalcode or 'non inserito'"/>
+                                        </strong>
+                                    </li>
+                                    <li>IBAN:
+                                        <t t-set="partner_bank" t-value="partner.bank_ids[:1]"/>
+                                        <strong>
+                                            <t t-esc="partner_bank.acc_number if partner_bank else 'non inserito'"/>
+                                        </strong>
+                                    </li>
+                                    <li>Istituto bancario:
+                                        <strong>
+                                            <t t-esc="partner_bank.bank_id.name if partner_bank and partner_bank.bank_id else 'non inserito'"/>
+                                        </strong>
+                                    </li>
+                                    <li>Data: <strong>odierna (auto)</strong></li>
+                                </ul>
+                                <t t-if="config and config.accordo_retrocessioni_template">
+                                    <a href="/my/contratti/retrocessioni/download"
+                                       class="btn btn-primary">
+                                        <i class="fa fa-file-word-o me-2"/>
+                                        Scarica Accordo Retrocessioni.docx
+                                    </a>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-warning">
+                                        <i class="fa fa-clock-o me-2"/>
+                                        Template non ancora disponibile.
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Upload firmato -->
+                            <div class="col-md-6 mb-3">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fa fa-upload me-2 text-success"/>
+                                    Carica il documento firmato
+                                </h6>
+                                <t t-if="partner.accordo_retrocessioni_ed">
+                                    <div class="alert alert-success mb-3">
+                                        <i class="fa fa-check-circle me-2"/>
+                                        Documento caricato il
+                                        <strong>
+                                            <t t-esc="partner.accordo_retrocessioni_upload_date
+                                                      and partner.accordo_retrocessioni_upload_date.strftime('%d/%m/%Y')
+                                                      or 'data sconosciuta'"/>
+                                        </strong>
+                                        <br/>
+                                        <small class="text-muted">
+                                            File:
+                                            <t t-esc="partner.accordo_retrocessioni_filename or 'accordo_retrocessioni'"/>
+                                        </small>
+                                    </div>
+                                </t>
+                                <form action="/my/contratti/retrocessioni/upload"
+                                      method="post"
+                                      enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token"
+                                           t-att-value="request.csrf_token()"/>
+                                    <div class="mb-3">
+                                        <label for="retrocessioni_file" class="form-label small">
+                                            Seleziona il file firmato:
+                                        </label>
+                                        <input type="file"
+                                               name="retrocessioni_file"
+                                               id="retrocessioni_file"
+                                               class="form-control form-control-sm"
+                                               accept=".docx,.pdf"
+                                               required="required"/>
+                                        <div class="form-text">Formati accettati: .docx, .pdf</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fa fa-upload me-2"/>
+                                        <t t-if="partner.accordo_retrocessioni_ed">
+                                            Sostituisci documento
+                                        </t>
+                                        <t t-else="">
+                                            Carica documento firmato
+                                        </t>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================
+                     CONTRATTO 2: Accordo Condomini Aggregati ED
+                     Visibile solo se l'amministratore ha almeno un condominio attivo
+                ====================================================== -->
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-building me-2"/>
+                            Accordo Condomini Aggregati ED
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Questo documento include l'elenco dei condomini che hai inserito
+                            nella piattaforma (Allegato A).
+                            Ogni volta che aggiungi o rimuovi un condominio dovrai scaricare
+                            il documento aggiornato e caricarlo nuovamente firmato.
+                        </p>
+
+                        <t t-if="not condomini_count">
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle me-2"/>
+                                Non hai ancora inserito nessun condominio.
+                                <a href="/my/condomini/new" class="alert-link">
+                                    Aggiungi il primo condominio
+                                </a>
+                                per sbloccare questo documento.
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="alert alert-info mb-4">
+                                <i class="fa fa-info-circle me-2"/>
+                                <strong>Attenzione:</strong> ogni volta che aggiungi o
+                                rimuovi un condominio scarica e ricarica questo documento.
+                                Il documento include automaticamente l'Allegato A con
+                                <strong><t t-esc="condomini_count"/></strong>
+                                condomin<t t-if="condomini_count == 1">io</t><t t-else="">i</t>
+                                attiv<t t-if="condomini_count == 1">o</t><t t-else="">i</t>.
+                            </div>
+
+                            <div class="row">
+                                <!-- Download pre-compilato con Allegato A -->
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fa fa-download me-2 text-primary"/>
+                                        Scarica il documento
+                                    </h6>
+                                    <p class="small text-muted mb-2">
+                                        Il documento verrà pre-compilato con:
+                                    </p>
+                                    <ul class="small text-muted mb-3">
+                                        <li>Nome: <strong t-field="partner.name"/></li>
+                                        <li>Codice Fiscale:
+                                            <strong>
+                                                <t t-esc="partner.fiscalcode or 'non inserito'"/>
+                                            </strong>
+                                        </li>
+                                        <li>Allegato A:
+                                            <strong>
+                                                tabella con
+                                                <t t-esc="condomini_count"/>
+                                                condomin<t t-if="condomini_count == 1">io</t><t t-else="">i</t>
+                                            </strong>
+                                        </li>
+                                    </ul>
+                                    <t t-if="config and config.contratto_template">
+                                        <a href="/my/contratti/condomini-aggregati/download"
+                                           class="btn btn-primary">
+                                            <i class="fa fa-file-word-o me-2"/>
+                                            Scarica Accordo Condomini Aggregati.docx
+                                        </a>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="alert alert-warning">
+                                            <i class="fa fa-clock-o me-2"/>
+                                            Template non ancora disponibile.
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <!-- Upload firmato -->
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fa fa-upload me-2 text-success"/>
+                                        Carica il documento firmato
+                                    </h6>
+                                    <t t-if="partner.accordo_condomini_aggregati_ed">
+                                        <div class="alert alert-success mb-3">
+                                            <i class="fa fa-check-circle me-2"/>
+                                            Documento caricato il
+                                            <strong>
+                                                <t t-esc="partner.accordo_condomini_upload_date
+                                                          and partner.accordo_condomini_upload_date.strftime('%d/%m/%Y')
+                                                          or 'data sconosciuta'"/>
+                                            </strong>
+                                            <br/>
+                                            <small class="text-muted">
+                                                File:
+                                                <t t-esc="partner.accordo_condomini_filename or 'accordo_condomini'"/>
+                                            </small>
+                                        </div>
+                                    </t>
+                                    <form action="/my/contratti/condomini-aggregati/upload"
+                                          method="post"
+                                          enctype="multipart/form-data">
+                                        <input type="hidden" name="csrf_token"
+                                               t-att-value="request.csrf_token()"/>
+                                        <div class="mb-3">
+                                            <label for="contratto_file" class="form-label small">
+                                                Seleziona il file firmato:
+                                            </label>
+                                            <input type="file"
+                                                   name="contratto_file"
+                                                   id="contratto_file"
+                                                   class="form-control form-control-sm"
+                                                   accept=".docx,.pdf"
+                                                   required="required"/>
+                                            <div class="form-text">Formati accettati: .docx, .pdf</div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="fa fa-upload me-2"/>
+                                            <t t-if="partner.accordo_condomini_aggregati_ed">
+                                                Sostituisci documento
+                                            </t>
+                                            <t t-else="">
+                                                Carica documento firmato
+                                            </t>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Riepilogo stato contratti -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fa fa-list-check me-2"/>
+                        Stato documenti
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="mb-1">
+                                    <strong>Accordo Retrocessioni:</strong>
+                                </p>
+                                <t t-if="partner.accordo_retrocessioni_ed">
+                                    <span class="badge bg-success">
+                                        <i class="fa fa-check me-1"/>Caricato
+                                    </span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fa fa-clock-o me-1"/>In attesa
+                                    </span>
+                                </t>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1">
+                                    <strong>Accordo Condomini Aggregati:</strong>
+                                </p>
+                                <t t-if="partner.accordo_condomini_aggregati_ed">
+                                    <span class="badge bg-success">
+                                        <i class="fa fa-check me-1"/>Caricato
+                                    </span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fa fa-clock-o me-1"/>In attesa
+                                    </span>
+                                </t>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1">
+                                    <strong>Condomini gestiti:</strong>
+                                </p>
+                                <span class="badge bg-info">
+                                    <t t-esc="condomini_count"/>
+                                </span>
+                                <a href="/my/condomini" class="btn btn-sm btn-outline-secondary ms-2">
+                                    <i class="fa fa-building me-1"/>
+                                    Gestisci condomini
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </t>
+    </template>
+</odoo>

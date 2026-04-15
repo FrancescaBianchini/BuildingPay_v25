@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         MENU PRINCIPALE BUILDINGPAY
+    ================================================= -->
+    <menuitem id="menu_buildingpay_root"
+              name="BuildingPay"
+              sequence="90"
+              web_icon="buildingpay_v25,static/description/icon.png"
+              groups="BuildingPay_v25.group_buildingpay_user"/>
+
+    <!-- ================================================
+         MENU: CONFIGURAZIONE
+    ================================================= -->
+    <menuitem id="menu_buildingpay_config_root"
+              name="Configurazione"
+              parent="menu_buildingpay_root"
+              sequence="100"
+              groups="BuildingPay_v25.group_buildingpay_manager"/>
+
+    <menuitem id="menu_buildingpay_config"
+              name="Impostazioni BuildingPay"
+              parent="menu_buildingpay_config_root"
+              action="action_buildingpay_config"
+              sequence="10"
+              groups="BuildingPay_v25.group_buildingpay_manager"/>
+
+    <menuitem id="menu_buildingpay_listini"
+              name="Listini Condominio"
+              parent="menu_buildingpay_config_root"
+              action="action_buildingpay_listini"
+              sequence="20"
+              groups="BuildingPay_v25.group_buildingpay_manager"/>
+
+    <menuitem id="menu_buildingpay_prodotti_pagopa"
+              name="Prodotti PagoPa"
+              parent="menu_buildingpay_config_root"
+              action="action_buildingpay_prodotti_pagopa"
+              sequence="30"
+              groups="BuildingPay_v25.group_buildingpay_manager"/>
+
+    <!-- ================================================
+         MENU: FATTURAZIONE CONDOMINI
+         Solo per gruppo Responsabile Amministrativo Condomini
+    ================================================= -->
+    <menuitem id="menu_buildingpay_fatturazione_root"
+              name="Fatturazione Condomini"
+              parent="menu_buildingpay_root"
+              sequence="200"
+              groups="BuildingPay_v25.group_responsabile_amministrativo"/>
+
+    <menuitem id="menu_buildingpay_genera_fattura"
+              name="Genera Fattura Condomini"
+              parent="menu_buildingpay_fatturazione_root"
+              action="action_buildingpay_import_new"
+              sequence="10"
+              groups="BuildingPay_v25.group_responsabile_amministrativo"/>
+
+    <menuitem id="menu_buildingpay_import_errors"
+              name="Importazione Fatture - Errori"
+              parent="menu_buildingpay_fatturazione_root"
+              action="action_buildingpay_import_list"
+              sequence="20"
+              groups="BuildingPay_v25.group_responsabile_amministrativo"/>
+</odoo>

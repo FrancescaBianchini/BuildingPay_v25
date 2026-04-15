@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        BuildingPay - Listini Condominio
+        View standalone (no inherit_id) per compatibilità massima.
+        Accessibile dal menu BuildingPay > Listini Condominio.
+    -->
+
+    <!-- ================================================
+         FORM VIEW standalone: product.pricelist
+    ================================================= -->
+    <record id="view_product_pricelist_form_buildingpay" model="ir.ui.view">
+        <field name="name">product.pricelist.form.buildingpay</field>
+        <field name="model">product.pricelist</field>
+        <field name="arch" type="xml">
+            <form string="Listino Condominio BuildingPay">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nome listino"/></h1>
+                    </div>
+                    <group>
+                        <group string="Impostazioni generali">
+                            <field name="currency_id" options="{'no_create': True}"/>
+                            <field name="is_listino_condominio"/>
+                        </group>
+                        <group string="Retrocessioni"
+                               invisible="not is_listino_condominio">
+                            <field name="perc_retrocessione_amministratore"
+                                   invisible="not is_listino_condominio"/>
+                            <field name="perc_retrocessione_referrer"
+                                   invisible="not is_listino_condominio"/>
+                        </group>
+                    </group>
+                    <group string="Amministratori collegati"
+                           invisible="not is_listino_condominio">
+                        <field name="amministratore_ids"
+                               widget="many2many_tags"
+                               domain="[('is_amministratore', '=', True)]"
+                               invisible="not is_listino_condominio"
+                               nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================
+         LIST VIEW standalone: product.pricelist
+    ================================================= -->
+    <record id="view_product_pricelist_tree_buildingpay" model="ir.ui.view">
+        <field name="name">product.pricelist.tree.buildingpay</field>
+        <field name="model">product.pricelist</field>
+        <field name="arch" type="xml">
+            <tree string="Listini Condominio BuildingPay">
+                <field name="name"/>
+                <field name="currency_id"/>
+                <field name="is_listino_condominio"/>
+                <field name="perc_retrocessione_amministratore"/>
+                <field name="perc_retrocessione_referrer"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ================================================
+         ACTION: Listini Condominio BuildingPay
+    ================================================= -->
+    <record id="action_buildingpay_listini" model="ir.actions.act_window">
+        <field name="name">Listini Condominio</field>
+        <field name="res_model">product.pricelist</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_listino_condominio', '=', True)]</field>
+        <field name="context">{'default_is_listino_condominio': True}</field>
+        <field name="views" eval="[
+            (ref('view_product_pricelist_tree_buildingpay'), 'list'),
+            (ref('view_product_pricelist_form_buildingpay'), 'form'),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea il primo listino condominio
+            </p>
+            <p>
+                I listini condominio definiscono le percentuali di retrocessione
+                per amministratori e referrer.
+            </p>
+        </field>
+    </record>
+</odoo>

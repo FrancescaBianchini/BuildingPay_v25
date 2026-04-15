@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        BuildingPay - Configurazione
+        Sintassi Odoo 17 EE:
+        - attrs rimosso: si usano invisible/required/readonly come espressioni Python dirette
+        - Esempi: invisible="not create_activity_on_contract"
+                  required="create_activity_on_contract"
+    -->
+
+    <!-- ================================================
+         FORM VIEW: buildingpay_v25.config
+    ================================================= -->
+    <record id="view_buildingpay_config_form" model="ir.ui.view">
+        <field name="name">buildingpay_v25.config.form</field>
+        <field name="model">buildingpay_v25.config</field>
+        <field name="arch" type="xml">
+            <form string="Configurazione BuildingPay">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="website_id" options="{'no_create': True}"/>
+                        </h1>
+                    </div>
+
+                    <notebook>
+                        <!-- Tab: Template Accordo Retrocessioni -->
+                        <page string="Template Accordo Retrocessioni" name="template_retrocessioni">
+                            <p class="text-muted">
+                                File .docx con i seguenti placeholder:
+                                [NOME AMMINISTRATORE], [CODICE FISCALE], [IBAN], [NOME BANCA], [DATA]
+                            </p>
+                            <group>
+                                <field name="accordo_retrocessioni_template" widget="binary"
+                                       filename="accordo_retrocessioni_template_filename"/>
+                                <field name="accordo_retrocessioni_template_filename"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab: Template Accordo Condomini Aggregati ED -->
+                        <page string="Template Accordo Condomini Aggregati ED" name="template_condomini">
+                            <p class="text-muted">
+                                File .docx con i seguenti placeholder:
+                                [NOME AMMINISTRATORE], [________] (CF), [ALLEGATO_A] (tabella condomini)
+                            </p>
+                            <group>
+                                <field name="contratto_template" widget="binary"
+                                       filename="contratto_template_filename"/>
+                                <field name="contratto_template_filename"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab: Attivita automatica -->
+                        <page string="Attività Automatica" name="activity">
+                            <group>
+                                <field name="create_activity_on_contract"/>
+                            </group>
+                            <!-- Odoo 17: invisible come espressione Python diretta -->
+                            <group invisible="not create_activity_on_contract">
+                                <group string="Configurazione attività">
+                                    <field name="activity_responsible_id"
+                                           required="create_activity_on_contract"/>
+                                    <field name="activity_days"
+                                           required="create_activity_on_contract"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Tab: Destinatari email -->
+                        <page string="Destinatari Email" name="emails">
+                            <group>
+                                <group string="Report condomini attivi">
+                                    <field name="condomini_attivati_email"
+                                           placeholder="email1@esempio.it, email2@esempio.it"/>
+                                </group>
+                                <group string="Notifica condomini dismessi">
+                                    <field name="condomini_dismessi_email"
+                                           placeholder="email1@esempio.it, email2@esempio.it"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================
+         LIST VIEW: buildingpay_v25.config
+    ================================================= -->
+    <record id="view_buildingpay_config_list" model="ir.ui.view">
+        <field name="name">buildingpay_v25.config.list</field>
+        <field name="model">buildingpay_v25.config</field>
+        <field name="arch" type="xml">
+            <tree string="Configurazioni BuildingPay">
+                <field name="website_id"/>
+                <field name="create_activity_on_contract"/>
+                <field name="activity_responsible_id"/>
+                <field name="activity_days"/>
+                <field name="condomini_attivati_email"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ================================================
+         ACTION: buildingpay_v25.config
+    ================================================= -->
+    <record id="action_buildingpay_config" model="ir.actions.act_window">
+        <field name="name">Configurazione BuildingPay</field>
+        <field name="res_model">buildingpay_v25.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea la prima configurazione BuildingPay
+            </p>
+            <p>
+                Configura il sito web, il template del contratto e le
+                impostazioni per le attività automatiche.
+            </p>
+        </field>
+    </record>
+</odoo>

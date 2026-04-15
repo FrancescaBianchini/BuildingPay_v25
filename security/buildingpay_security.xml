@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ==========================================
+         CATEGORIE
+    =========================================== -->
+    <record id="module_category_buildingpay" model="ir.module.category">
+        <field name="name">BuildingPay</field>
+        <field name="description">Gestione Amministratori Condomini</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <!-- ==========================================
+         GRUPPI DI SICUREZZA
+    =========================================== -->
+
+    <!-- Gruppo base: accesso in lettura al modulo -->
+    <record id="group_buildingpay_user" model="res.groups">
+        <field name="name">Utente BuildingPay</field>
+        <field name="category_id" ref="module_category_buildingpay"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Gruppo manager: può gestire il checkbox Amministratore -->
+    <record id="group_buildingpay_manager" model="res.groups">
+        <field name="name">Manager BuildingPay</field>
+        <field name="category_id" ref="module_category_buildingpay"/>
+        <field name="implied_ids" eval="[(4, ref('group_buildingpay_user'))]"/>
+    </record>
+
+    <!-- Gruppo responsabile amministrativo: vede menu contabilità -->
+    <record id="group_responsabile_amministrativo" model="res.groups">
+        <field name="name">Responsabile Amministrativo Condomini</field>
+        <field name="category_id" ref="module_category_buildingpay"/>
+        <field name="implied_ids" eval="[(4, ref('group_buildingpay_manager'))]"/>
+    </record>
+
+    <!-- ==========================================
+         REGOLE DI ACCESSO AI RECORD
+    =========================================== -->
+
+    <!-- buildingpay_v25.config: solo manager può scrivere -->
+    <record id="rule_buildingpay_config_manager" model="ir.rule">
+        <field name="name">BuildingPay Config: Manager può modificare</field>
+        <field name="model_id" ref="model_buildingpay_v25_config"/>
+        <field name="groups" eval="[(4, ref('group_buildingpay_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

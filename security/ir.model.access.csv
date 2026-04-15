@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_buildingpay_config_user,buildingpay.config.user,model_buildingpay_v25_config,BuildingPay_v25.group_buildingpay_user,1,0,0,0
+access_buildingpay_config_manager,buildingpay.config.manager,model_buildingpay_v25_config,BuildingPay_v25.group_buildingpay_manager,1,1,1,0
+access_buildingpay_import_user,buildingpay.import.user,model_buildingpay_v25_import,BuildingPay_v25.group_buildingpay_user,1,0,0,0
+access_buildingpay_import_manager,buildingpay.import.manager,model_buildingpay_v25_import,BuildingPay_v25.group_responsabile_amministrativo,1,1,1,1
+access_buildingpay_import_error_user,buildingpay.import.error.user,model_buildingpay_v25_import_error,BuildingPay_v25.group_buildingpay_user,1,0,0,0
+access_buildingpay_import_error_manager,buildingpay.import.error.manager,model_buildingpay_v25_import_error,BuildingPay_v25.group_responsabile_amministrativo,1,1,1,1

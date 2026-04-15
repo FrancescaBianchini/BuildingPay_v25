@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         PAGINA PORTALE: Lista Condomini
+    ================================================= -->
+    <template id="portal_condomini"
+              name="BuildingPay - Lista Condomini">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">I miei Condomini</t>
+            </t>
+
+            <div class="container mt-4">
+
+                <!-- Messaggi di feedback -->
+                <t t-if="request.params.get('success_add')">
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fa fa-check-circle me-2"/>
+                        Condominio aggiunto con successo!
+                        Ricorda di aggiornare il tuo contratto nella sezione
+                        <a href="/my/contratti">Contratti</a>.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('success_edit')">
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fa fa-check-circle me-2"/>
+                        Condominio aggiornato con successo!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('success_archive')">
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fa fa-check-circle me-2"/>
+                        Condominio archiviato con successo.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('error')">
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fa fa-exclamation-circle me-2"/>
+                        Si è verificato un errore. Riprova o contatta l'assistenza.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+
+                <!-- Pulsante aggiungi -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">
+                        Condomini gestiti
+                        <span class="badge bg-secondary ms-2">
+                            <t t-esc="len(condomini)"/>
+                        </span>
+                    </h4>
+                    <a href="/my/condomini/new" class="btn btn-primary">
+                        <i class="fa fa-plus me-2"/>
+                        Aggiungi Condominio
+                    </a>
+                </div>
+
+                <!-- Lista condomini -->
+                <t t-if="condomini">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        <t t-foreach="condomini" t-as="condo">
+                            <div class="col">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <strong t-field="condo.name"/>
+                                        <t t-if="condo.accordo_condomini_aggregati">
+                                            <span class="badge bg-success">
+                                                <i class="fa fa-check me-1"/>Accordo
+                                            </span>
+                                        </t>
+                                    </div>
+                                    <div class="card-body">
+                                        <address class="mb-2">
+                                            <t t-if="condo.street">
+                                                <t t-esc="condo.street"/><br/>
+                                            </t>
+                                            <t t-if="condo.zip or condo.city">
+                                                <t t-esc="condo.zip"/>
+                                                <t t-esc="condo.city"/><br/>
+                                            </t>
+                                            <t t-if="condo.state_id">
+                                                (<t t-esc="condo.state_id.name"/>)<br/>
+                                            </t>
+                                        </address>
+                                        <dl class="row small mb-0">
+                                            <t t-if="condo.fiscalcode">
+                                                <dt class="col-5 text-muted">C.F.:</dt>
+                                                <dd class="col-7"><t t-esc="condo.fiscalcode"/></dd>
+                                            </t>
+                                            <t t-if="condo.pec_mail">
+                                                <dt class="col-5 text-muted">PEC:</dt>
+                                                <dd class="col-7">
+                                                    <a t-att-href="'mailto:' + condo.pec_mail">
+                                                        <t t-esc="condo.pec_mail"/>
+                                                    </a>
+                                                </dd>
+                                            </t>
+                                            <t t-if="condo.codice_destinatario">
+                                                <dt class="col-5 text-muted">SDI:</dt>
+                                                <dd class="col-7">
+                                                    <t t-esc="condo.codice_destinatario"/>
+                                                </dd>
+                                            </t>
+                                        </dl>
+                                    </div>
+                                    <div class="card-footer d-flex gap-2">
+                                        <a t-att-href="'/my/condomini/' + str(condo.id)"
+                                           class="btn btn-sm btn-outline-primary flex-fill">
+                                            <i class="fa fa-pencil me-1"/>
+                                            Modifica
+                                        </a>
+                                        <form t-att-action="'/my/condomini/' + str(condo.id) + '/archive'"
+                                              method="post"
+                                              onsubmit="return confirm('Sei sicuro di voler archiviare questo condominio? Questa operazione non può essere annullata.')">
+                                            <input type="hidden" name="csrf_token"
+                                                   t-att-value="request.csrf_token()"/>
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger">
+                                                <i class="fa fa-archive me-1"/>
+                                                Archivia
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- Stato vuoto -->
+                <t t-else="">
+                    <div class="text-center py-5">
+                        <i class="fa fa-building-o fa-4x text-muted mb-3 d-block"/>
+                        <h5 class="text-muted">Nessun condominio registrato</h5>
+                        <p class="text-muted">
+                            Aggiungi il tuo primo condominio cliccando su
+                            "Aggiungi Condominio".
+                        </p>
+                        <a href="/my/condomini/new" class="btn btn-primary mt-2">
+                            <i class="fa fa-plus me-2"/>
+                            Aggiungi Condominio
+                        </a>
+                    </div>
+                </t>
+
+            </div>
+        </t>
+    </template>
+
+    <!-- ================================================
+         FORM CONDOMINIO: Crea / Modifica
+    ================================================= -->
+    <template id="portal_condominio_form"
+              name="BuildingPay - Form Condominio">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">
+                    <t t-if="mode == 'create'">Nuovo Condominio</t>
+                    <t t-else="">Modifica Condominio</t>
+                </t>
+            </t>
+
+            <div class="container mt-4">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fa fa-building-o me-2"/>
+                                <t t-if="mode == 'create'">
+                                    Aggiungi nuovo condominio
+                                </t>
+                                <t t-else="">
+                                    Modifica: <strong t-field="condominio.name"/>
+                                </t>
+                            </div>
+                            <div class="card-body">
+
+                                <t t-set="form_action">
+                                    <t t-if="mode == 'create'">/my/condomini/new/save</t>
+                                    <t t-else="">
+                                        <t t-esc="'/my/condomini/' + str(condominio.id) + '/save'"/>
+                                    </t>
+                                </t>
+
+                                <form t-att-action="form_action"
+                                      method="post"
+                                      enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token"
+                                           t-att-value="request.csrf_token()"/>
+
+                                    <!-- Nome -->
+                                    <div class="mb-3">
+                                        <label for="condo_name" class="form-label">
+                                            Nome Condominio <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text"
+                                               id="condo_name"
+                                               name="name"
+                                               class="form-control"
+                                               t-att-class="'is-invalid' if errors and errors.get('name') else ''"
+                                               t-att-value="form_data.get('name', '') if form_data else (condominio.name if condominio else '')"
+                                               placeholder="Es. Condominio Il Giardino"
+                                               required="required"/>
+                                        <t t-if="errors and errors.get('name')">
+                                            <div class="invalid-feedback">
+                                                <t t-esc="errors.get('name')"/>
+                                            </div>
+                                        </t>
+                                    </div>
+
+                                    <!-- Indirizzo -->
+                                    <h6 class="text-muted mt-4 mb-3">Indirizzo</h6>
+
+                                    <div class="mb-3">
+                                        <label for="condo_street" class="form-label">
+                                            Via e numero civico <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text"
+                                               id="condo_street"
+                                               name="street"
+                                               class="form-control"
+                                               t-att-class="'is-invalid' if errors and errors.get('street') else ''"
+                                               t-att-value="form_data.get('street', '') if form_data else (condominio.street if condominio else '')"
+                                               placeholder="Es. Via Roma 15"
+                                               required="required"/>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <label for="condo_zip" class="form-label">
+                                                CAP <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text"
+                                                   id="condo_zip"
+                                                   name="zip"
+                                                   class="form-control"
+                                                   t-att-value="form_data.get('zip', '') if form_data else (condominio.zip if condominio else '')"
+                                                   placeholder="00100"
+                                                   required="required"/>
+                                        </div>
+                                        <div class="col-md-5 mb-3">
+                                            <label for="condo_city" class="form-label">
+                                                Città <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text"
+                                                   id="condo_city"
+                                                   name="city"
+                                                   class="form-control"
+                                                   t-att-value="form_data.get('city', '') if form_data else (condominio.city if condominio else '')"
+                                                   placeholder="Roma"
+                                                   required="required"/>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="condo_country" class="form-label">
+                                                Paese
+                                            </label>
+                                            <select id="condo_country"
+                                                    name="country_id"
+                                                    class="form-select">
+                                                <option value="">-- Seleziona --</option>
+                                                <t t-foreach="countries" t-as="country">
+                                                    <option t-att-value="country.id"
+                                                            t-att-selected="'selected' if (form_data and str(form_data.get('country_id','')) == str(country.id)) or (condominio and condominio.country_id.id == country.id) else None">
+                                                        <t t-esc="country.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dati fiscali -->
+                                    <h6 class="text-muted mt-4 mb-3">Dati fiscali e fatturazione</h6>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="condo_fiscalcode" class="form-label">
+                                                Codice Fiscale <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text"
+                                                   id="condo_fiscalcode"
+                                                   name="fiscalcode"
+                                                   class="form-control"
+                                                   t-att-class="'is-invalid' if errors and errors.get('fiscalcode') else ''"
+                                                   t-att-value="form_data.get('fiscalcode', '') if form_data else (condominio.fiscalcode if condominio else '')"
+                                                   placeholder="Es. 97012345678"
+                                                   required="required"/>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="condo_pec" class="form-label">
+                                                Email PEC
+                                            </label>
+                                            <input type="email"
+                                                   id="condo_pec"
+                                                   name="pec_mail"
+                                                   class="form-control"
+                                                   t-att-value="form_data.get('pec_mail', '') if form_data else (condominio.pec_mail if condominio else '')"
+                                                   placeholder="pec@pec.it"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="condo_iban" class="form-label">
+                                                IBAN
+                                            </label>
+                                            <input type="text"
+                                                   id="condo_iban"
+                                                   name="iban"
+                                                   class="form-control"
+                                                   t-att-value="form_data.get('iban', '') if form_data else (bank.acc_number if bank else '')"
+                                                   placeholder="Es. IT60 X054 2811 1010 0000 0123 456"/>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="condo_sdi" class="form-label">
+                                                Codice Destinatario (SDI)
+                                            </label>
+                                            <input type="text"
+                                                   id="condo_sdi"
+                                                   name="codice_destinatario"
+                                                   class="form-control"
+                                                   maxlength="7"
+                                                   t-att-value="form_data.get('codice_destinatario', '') if form_data else (condominio.codice_destinatario if condominio else '')"
+                                                   placeholder="Es. 0000000"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pulsanti -->
+                                    <div class="d-flex gap-2 mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-save me-2"/>
+                                            <t t-if="mode == 'create'">Aggiungi Condominio</t>
+                                            <t t-else="">Salva modifiche</t>
+                                        </button>
+                                        <a href="/my/condomini" class="btn btn-outline-secondary">
+                                            <i class="fa fa-arrow-left me-2"/>
+                                            Annulla
+                                        </a>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

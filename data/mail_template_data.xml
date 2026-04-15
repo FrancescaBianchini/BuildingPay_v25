@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- ================================================
+         EMAIL TEMPLATE: Mail benvenuto amministratore
+         Inviata al nuovo utente portale dopo la registrazione.
+         Modificabile da interfaccia Odoo (noupdate="1").
+    ================================================= -->
+    <record id="email_template_benvenuto_amministratore" model="mail.template">
+        <field name="name">Mail benvenuto amministratore</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="subject">Benvenuto in BuildingPay - Riepilogo registrazione</field>
+        <field name="email_to">{{ object.email }}</field>
+        <field name="email_from">{{ (user.email_formatted or user.company_id.email_formatted) }}</field>
+        <field name="lang">{{ object.lang }}</field>
+        <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Gentile <strong>{{ object.name }}</strong>,
+    </p>
+    <br/>
+    <p>
+        Benvenuto in <strong>BuildingPay</strong>! La tua registrazione è stata completata con successo.
+    </p>
+    <p>
+        Di seguito trovi il riepilogo delle informazioni inserite nel sistema:
+    </p>
+    <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr style="background-color: #f5f5f5;">
+            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Nome e Cognome</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Email</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.email or '-' }}</td>
+        </tr>
+        <tr style="background-color: #f5f5f5;">
+            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Indirizzo</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                {{ object.street or '' }}
+                {% if object.city %} - {{ object.city }}{% endif %}
+                {% if object.zip %} {{ object.zip }}{% endif %}
+                {% if object.state_id %} ({{ object.state_id.name }}){% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Codice Fiscale / P.IVA</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                {{ object.fiscalcode or '' }}
+                {% if object.vat %} / {{ object.vat }}{% endif %}
+            </td>
+        </tr>
+        {% if object.referrer_id %}
+        <tr style="background-color: #f5f5f5;">
+            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Invitato da</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.referrer_id.name }}</td>
+        </tr>
+        {% endif %}
+    </table>
+    <p>
+        Per completare la procedura di adesione, ti chiediamo di scaricare, compilare e
+        firmare il documento <strong>"Accordo Condomini Aggregati"</strong> disponibile
+        nell'area riservata, sezione "Contratto Generale".
+    </p>
+    {% if object.company_id.buildingpay_firma_link %}
+    <p>
+        Puoi procedere con la firma elettronica tramite Aruba al seguente link:<br/>
+        <a href="{{ object.company_id.buildingpay_firma_link }}" style="color: #007bff;">
+            {{ object.company_id.buildingpay_firma_link }}
+        </a>
+    </p>
+    {% endif %}
+    <p>
+        Per accedere alla tua area riservata, utilizza le credenziali che ti sono state inviate
+        separatamente da Odoo.
+    </p>
+    <br/>
+    <p>Cordiali saluti,<br/><strong>Il team BuildingPay</strong></p>
+</div>
+        ]]></field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+</odoo>

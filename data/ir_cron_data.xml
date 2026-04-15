@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        BuildingPay - Dati base: sequenza e azione pianificata
+        Odoo 17: ir.cron NON eredita più da ir.actions.server.
+        Il campo "code" è direttamente su ir.cron.
+        NON usare <field name="state">code</field>.
+    -->
+
+    <!-- ================================================
+         SEQUENZA: buildingpay_v25.import
+    ================================================= -->
+    <record id="seq_buildingpay_import" model="ir.sequence">
+        <field name="name">BuildingPay Importazione</field>
+        <field name="code">buildingpay_v25.import</field>
+        <field name="prefix">IMP/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- ================================================
+         AZIONE PIANIFICATA: Report giornaliero condomini
+         Odoo 17: ir.cron usa il campo "code" direttamente.
+         Non serve più "state = 'code'" (era ereditato da
+         ir.actions.server nelle versioni precedenti).
+    ================================================= -->
+    <record id="ir_cron_buildingpay_daily_report" model="ir.cron">
+        <field name="name">BuildingPay: Report giornaliero condomini attivi</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="code">model.action_send_daily_condomini_report()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active" eval="True"/>
+        <!--
+            Imposta l'orario di esecuzione alle 23:30 UTC del giorno successivo.
+            Dopo l'installazione, modificare il campo "nextcall" dall'interfaccia
+            Impostazioni > Tecnico > Automazione > Azioni Pianificate per
+            adeguare all'orario locale desiderato (23:30 ora locale).
+        -->
+        <field name="nextcall" eval="(datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d 23:30:00')"/>
+        <field name="doall" eval="False"/>
+        <field name="priority">5</field>
+    </record>
+</odoo>

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        BuildingPay - Import Fatture Condomini
+        Sintassi Odoo 17 EE:
+        - attrs rimosso: invisible/readonly come espressioni Python dirette
+        - states su bottoni e campi rimosso: sostituito da invisible
+        - widget="statusbar" ancora valido
+        - widget="statinfo" ancora valido
+        - decoration-* ancora valido nelle liste
+        - confirm ancora valido sui bottoni
+    -->
+
+    <!-- ================================================
+         FORM VIEW: buildingpay_v25.import
+    ================================================= -->
+    <record id="view_buildingpay_import_form" model="ir.ui.view">
+        <field name="name">buildingpay_v25.import.form</field>
+        <field name="model">buildingpay_v25.import</field>
+        <field name="arch" type="xml">
+            <form string="Importazione Fatture Condomini">
+                <header>
+                    <!--
+                        Odoo 17: invisible come espressione Python al posto di attrs.
+                        Sostituisce: attrs="{'invisible': [('state', '!=', 'draft')]}"
+                    -->
+                    <button name="action_process"
+                            string="Elabora"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"
+                            confirm="Procedere con l'elaborazione del file Excel? Verranno generate fatture e ordini di acquisto."/>
+                    <button name="action_reset_draft"
+                            string="Riporta in Bozza"
+                            type="object"
+                            invisible="state == 'draft'"/>
+                    <!-- widget="statusbar" ancora valido in Odoo 17 -->
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,done,error"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoices"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                invisible="invoice_count == 0">
+                            <!-- widget="statinfo" ancora valido in Odoo 17 -->
+                            <field name="invoice_count" widget="statinfo"
+                                   string="Fatture"/>
+                        </button>
+                        <button name="action_view_purchase_orders"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-shopping-cart"
+                                invisible="purchase_order_count == 0">
+                            <field name="purchase_order_count" widget="statinfo"
+                                   string="Ordini acquisto"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <!-- Odoo 17: readonly come espressione Python -->
+                            <field name="name" readonly="state != 'draft'"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="File">
+                            <field name="excel_file" widget="binary"
+                                   filename="excel_filename"
+                                   readonly="state != 'draft'"/>
+                            <field name="excel_filename"
+                                   readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Informazioni">
+                            <field name="user_id" readonly="1"/>
+                            <field name="upload_date" readonly="1"/>
+                            <field name="error_count" readonly="1"
+                                   invisible="state == 'draft'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Note aggiuntive..."/>
+                    </group>
+
+                    <!-- Notebook errori: visibile dopo elaborazione -->
+                    <notebook invisible="state not in ('done', 'error')">
+                        <page string="Errori" name="errors"
+                              invisible="error_count == 0">
+                            <field name="error_ids" nolabel="1" readonly="1">
+                                <!-- decoration-danger ancora valido in Odoo 17 -->
+                                <tree decoration-danger="1">
+                                    <field name="row_number"/>
+                                    <field name="error_code"/>
+                                    <field name="error_description"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================
+         LIST VIEW: buildingpay_v25.import
+    ================================================= -->
+    <record id="view_buildingpay_import_list" model="ir.ui.view">
+        <field name="name">buildingpay_v25.import.list</field>
+        <field name="model">buildingpay_v25.import</field>
+        <field name="arch" type="xml">
+            <!--
+                decoration-danger/success ancora validi in Odoo 17.
+                La condizione usa la sintassi Python diretta.
+            -->
+            <tree string="Importazioni Fatture Condomini"
+                  decoration-danger="state == 'error'"
+                  decoration-success="state == 'done'">
+                <field name="name"/>
+                <field name="upload_date"/>
+                <field name="user_id"/>
+                <field name="excel_filename"/>
+                <field name="invoice_count"/>
+                <field name="purchase_order_count"/>
+                <field name="error_count"/>
+                <!-- widget="badge" ancora valido in Odoo 17 -->
+                <field name="state" widget="badge"
+                       decoration-danger="state == 'error'"
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ================================================
+         SEARCH VIEW: buildingpay_v25.import
+    ================================================= -->
+    <record id="view_buildingpay_import_search" model="ir.ui.view">
+        <field name="name">buildingpay_v25.import.search</field>
+        <field name="model">buildingpay_v25.import</field>
+        <field name="arch" type="xml">
+            <search string="Importazioni">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="excel_filename"/>
+                <filter string="Bozza" name="state_draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="Elaborato" name="state_done"
+                        domain="[('state', '=', 'done')]"/>
+                <filter string="Con errori" name="state_error"
+                        domain="[('state', '=', 'error')]"/>
+                <group expand="0" string="Raggruppa per">
+                    <filter string="Stato" name="group_state"
+                            context="{'group_by': 'state'}"/>
+                    <filter string="Utente" name="group_user"
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Data" name="group_date"
+                            context="{'group_by': 'upload_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================
+         ACTION: Genera fattura Condomini
+    ================================================= -->
+    <record id="action_buildingpay_import_new" model="ir.actions.act_window">
+        <field name="name">Genera Fattura Condomini</field>
+        <field name="res_model">buildingpay_v25.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'default_state': 'draft'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Carica un file Excel per generare fatture condomini
+            </p>
+        </field>
+    </record>
+
+    <!-- ================================================
+         ACTION: Lista importazioni ed errori
+    ================================================= -->
+    <record id="action_buildingpay_import_list" model="ir.actions.act_window">
+        <field name="name">Importazione Fatture Condomini - Errori</field>
+        <field name="res_model">buildingpay_v25.import</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_buildingpay_import_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Nessuna importazione trovata
+            </p>
+            <p>Usa "Genera Fattura Condomini" per avviare una nuova importazione.</p>
+        </field>
+    </record>
+</odoo>

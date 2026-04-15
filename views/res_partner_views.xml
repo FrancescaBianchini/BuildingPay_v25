@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        BuildingPay v21 - Estensione res.partner
+        Sintassi Odoo 17 EE:
+        - invisible/readonly come espressioni Python dirette (no attrs)
+        - Nessun list come type: usare tree
+        - REGOLA modifier: campo in invisible= NON puo avere groups= su nessuna istanza
+        - Listini: property_product_pricelist nativo (non nel tab BP)
+        - Dati bancari: sezione nativa Odoo "Conti Bancari" (res.partner.bank)
+        - Condomini: child contacts di tipo condominio, gestiti dal portale
+    -->
+
+    <record id="view_partner_form_buildingpay" model="ir.ui.view">
+        <field name="name">res.partner.form.buildingpay</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Icona edificio nella button_box per tipo condominio -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <div class="oe_stat_button"
+                     invisible="type != 'condominio'"
+                     groups="BuildingPay_v25.group_buildingpay_user">
+                    <i class="o_button_icon fa fa-fw fa-building"/>
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Condominio</span>
+                    </div>
+                </div>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+
+                <!-- TAB: BuildingPay -->
+                <page string="BuildingPay" name="buildingpay_page"
+                      groups="BuildingPay_v25.group_buildingpay_user">
+
+                    <!-- FLAG: senza groups= perche usato in invisible= sul sub-tab -->
+                    <group string="Ruolo BuildingPay">
+                        <field name="is_amministratore"
+                               string="Amministratore BuildingPay"
+                               widget="boolean_toggle"/>
+                        <field name="privacy_accepted"
+                               string="Privacy accettata"
+                               readonly="1"/>
+                        <field name="privacy_accepted_date"
+                               string="Data accettazione privacy"
+                               readonly="1"
+                               invisible="not privacy_accepted"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Amministratore"
+                              name="bp_page_admin"
+                              invisible="not is_amministratore">
+
+                            <separator string="Stato contratti"/>
+                            <group>
+                                <group string="Accordo Retrocessioni Amministratore ED">
+                                    <field name="accordo_retrocessioni_ed" readonly="1"/>
+                                    <field name="accordo_retrocessioni_filename"
+                                           readonly="1"
+                                           invisible="not accordo_retrocessioni_ed"/>
+                                    <field name="accordo_retrocessioni_upload_date"
+                                           readonly="1"
+                                           invisible="not accordo_retrocessioni_ed"/>
+                                </group>
+                                <group string="Accordo Condomini Aggregati ED">
+                                    <field name="accordo_condomini_aggregati_ed" readonly="1"/>
+                                    <field name="accordo_condomini_filename"
+                                           readonly="1"
+                                           invisible="not accordo_condomini_aggregati_ed"/>
+                                    <field name="accordo_condomini_upload_date"
+                                           readonly="1"
+                                           invisible="not accordo_condomini_aggregati_ed"/>
+                                </group>
+                            </group>
+
+                        </page>
+
+                        <page string="Dati Condominio"
+                              name="bp_page_condominio"
+                              invisible="type != 'condominio'">
+                            <group>
+                                <group string="Dati fiscali">
+                                    <field name="fiscalcode"/>
+                                    <field name="pec_mail"/>
+                                    <field name="codice_destinatario"/>
+                                    <field name="electronic_invoice_subjected"/>
+                                    <field name="electronic_invoice_obliged_subject"/>
+                                </group>
+                                <group string="Stato">
+                                    <field name="data_archiviazione" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+
+                    </notebook>
+                </page>
+
+                <!-- TAB: Referrer (sempre visibile a utenti BP) -->
+                <page string="Referrer" name="bp_referrer_page"
+                      groups="BuildingPay_v25.group_buildingpay_user">
+
+                    <group>
+                        <field name="referrer_id"
+                               string="Invitato da (Referrer)"
+                               domain="[('is_amministratore', '=', True)]"/>
+
+                        <label for="referrer_code" string="Codice Referrer (8 car.)"/>
+                        <div class="o_row">
+                            <field name="referrer_code"
+                                   nolabel="1"
+                                   placeholder="Es. AB12CD34"
+                                   groups="BuildingPay_v25.group_buildingpay_manager"/>
+                            <field name="referrer_code"
+                                   nolabel="1"
+                                   readonly="1"
+                                   groups="!BuildingPay_v25.group_buildingpay_manager"/>
+                            <button name="action_generate_referrer_code"
+                                    type="object"
+                                    string="&#x27F3; Genera"
+                                    class="btn btn-secondary btn-sm ms-1"
+                                    groups="BuildingPay_v25.group_buildingpay_manager"/>
+                        </div>
+
+                        <label for="referral_url" string="Link di invito"/>
+                        <div>
+                            <field name="referral_url"
+                                   nolabel="1"
+                                   readonly="1"
+                                   widget="CopyClipboardChar"
+                                   invisible="not referral_url"/>
+                            <span class="text-muted small"
+                                  invisible="referral_url">
+                                Imposta un codice referrer per generare il link.
+                            </span>
+                        </div>
+
+                        <label for="referred_ids" string="Amministratori invitati"/>
+                        <field name="referred_ids"
+                               nolabel="1"
+                               readonly="1"
+                               widget="many2many_tags"/>
+                    </group>
+
+                </page>
+
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

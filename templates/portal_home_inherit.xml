@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================
+         ESTENSIONE HOME PORTALE
+         Aggiunge le sezioni BuildingPay alla home del portale.
+
+         NOTA: la sezione è visibile solo ai partner con
+         is_amministratore = True.
+         - Se l'utente si registra con il form BuildingPay
+           (/web/signup?referrer=...) il flag è impostato
+           automaticamente.
+         - Se l'utente è creato manualmente dal backend
+           (Contatti → Azioni → Concedi accesso portale),
+           un amministratore Odoo deve aprire il record
+           Contatti del partner e spuntare "Amministratore".
+    ================================================= -->
+    <template id="portal_my_home_buildingpay"
+              name="BuildingPay - Sezioni Home Portale"
+              inherit_id="portal.portal_my_home"
+              priority="20">
+
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <!-- Usa 'is_amministratore' passato da _prepare_home_portal_values
+                 per evitare problemi di caching nei template QWeb di Odoo 17. -->
+            <t t-if="is_amministratore">
+
+                <!-- Sezione Contratti -->
+                <t t-call="portal.portal_docs_entry">
+                    <t t-set="title">Contratti</t>
+                    <t t-set="url">/my/contratti</t>
+                    <t t-set="icon" t-value="'fa-file-text-o'"/>
+                    <t t-set="text">Accordo Retrocessioni e Accordo Condomini Aggregati ED</t>
+                </t>
+
+                <!-- Sezione Condomini -->
+                <!-- NOTA: nessun 'count' né 'placeholder_count'.
+                     Il JS del portale Odoo 17 EE itera su TUTTE le chiavi della
+                     risposta AJAX e chiama getElementById(key).textContent su ciascuna.
+                     Se la sezione è nascosta (t-if) e l'elemento non esiste nel DOM,
+                     getElementById restituisce null → TypeError.
+                     Soluzione definitiva: nessun contatore in questa sezione. -->
+                <t t-call="portal.portal_docs_entry">
+                    <t t-set="title">Condomini</t>
+                    <t t-set="url">/my/condomini</t>
+                    <t t-set="icon" t-value="'fa-building-o'"/>
+                    <t t-set="text">Gestisci i tuoi indirizzi condominio</t>
+                </t>
+
+            </t>
+        </xpath>
+    </template>
+</odoo>
